@@ -1,0 +1,20 @@
+{
+  "name": "talkify-tts-api",
+  "version": "1.0.0",
+  "description": "Library to generate TTS directly from Talkify.net APIs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thaispalmer/talkify-tts-api.git"
+  },
+  "keywords": [
+    "tts",
+    "text to speech",
+    "speech synthesis"
+  ],
+  "author": "Thais Palmer <thais@safik.com.br>",
+  "license": "MIT"
+}
