@@ -19,6 +19,48 @@ export type SpeechOptions = Omit<TalkifyOptions, 'key'>;
 
 export type SpeechStream = AxiosResponse<Readable>['data'];
 
+export type Voice = {
+  culture: string;
+  name: string;
+  description: string;
+  isStandard: boolean;
+  isPremium: boolean;
+  isExclusive: boolean;
+  isNeural: boolean;
+  canUseSpeechMarks: boolean;
+  canWhisper: boolean;
+  canUseWordBreak: boolean;
+  canSpeakSoftly: boolean;
+  canUseVolume: boolean;
+  canUsePitch: boolean;
+  supportsSpeechMarks: boolean;
+  gender: 'Male' | 'Female';
+  standardVoice: boolean;
+  supportedFormats: string[];
+  language: string;
+}
+
+type VoiceResponse = {
+  Culture: string;
+  Name: string;
+  Description: string;
+  IsStandard: boolean;
+  IsPremium: boolean;
+  IsExclusive: boolean;
+  IsNeural: boolean;
+  CanUseSpeechMarks: boolean;
+  CanWhisper: boolean;
+  CanUseWordBreak: boolean;
+  CanSpeakSoftly: boolean;
+  CanUseVolume: boolean;
+  CanUsePitch: boolean;
+  SupportsSpeechMarks: boolean;
+  Gender: 'Male' | 'Female';
+  StandardVoice: boolean;
+  SupportedFormats: string[];
+  Language: string;
+}
+
 export class TalkifyError extends Error {
   public statusCode?: number;
 
@@ -97,6 +139,51 @@ export class Talkify {
         err,
         "REQUEST_ERROR",
         err.response?.statusText ?? 'Could not synthetize the audio',
+        err.response?.status
+      );
+    }
+  }
+
+  public async availableVoices(language?: string):Promise<Voice[]> {
+    try {
+      const response = await this.connector.get(
+        'speech/v1/voices',
+        { params: { key: this.defaultOptions.key } }
+      );
+
+      // Sanitize response
+      const voices: Voice[] = [];
+      response.data.forEach((rawVoice: VoiceResponse) => {
+        if (language && rawVoice.Language.toLowerCase() != language.toLowerCase()) return;
+        voices.push({
+          culture: rawVoice.Culture,
+          name: rawVoice.Name,
+          description: rawVoice.Description,
+          isStandard: rawVoice.IsStandard,
+          isPremium: rawVoice.IsPremium,
+          isExclusive: rawVoice.IsExclusive,
+          isNeural: rawVoice.IsNeural,
+          canUseSpeechMarks: rawVoice.CanUseSpeechMarks,
+          canWhisper: rawVoice.CanWhisper,
+          canUseWordBreak: rawVoice.CanUseWordBreak,
+          canSpeakSoftly: rawVoice.CanSpeakSoftly,
+          canUseVolume: rawVoice.CanUseVolume,
+          canUsePitch: rawVoice.CanUsePitch,
+          supportsSpeechMarks: rawVoice.SupportsSpeechMarks,
+          gender: rawVoice.Gender,
+          standardVoice: rawVoice.StandardVoice,
+          supportedFormats: rawVoice.SupportedFormats,
+          language: rawVoice.Language
+        });
+      });
+
+      return voices;
+    } catch (_err) {
+      const err = <AxiosError>_err;
+      throw new TalkifyError(
+        err,
+        "REQUEST_ERROR",
+        err.response?.statusText ?? 'Could not fetch the voices list',
         err.response?.status
       );
     }
