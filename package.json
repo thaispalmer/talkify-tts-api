@@ -21,6 +21,7 @@
   "author": "Thais Palmer <thais@safik.com.br>",
   "license": "MIT",
   "devDependencies": {
+    "dotenv": "^15.0.0",
     "prettier": "^2.5.1",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
