@@ -5,7 +5,7 @@ export interface TalkifyOptions {
   key: string | undefined;
   format?: 'mp3' | 'wav';
   fallbackLanguage?: string;
-  voice?: string;
+  voice?: Voice | string;
   rate?: number;
   ssml?: boolean;
   whisper?: boolean;
@@ -22,6 +22,9 @@ export type SpeechStream = AxiosResponse<Readable>['data'];
 export type Voice = {
   culture: string;
   name: string;
+  gender: 'Male' | 'Female';
+  language: string;
+  supportedFormats: string[];
   description: string;
   isStandard: boolean;
   isPremium: boolean;
@@ -33,11 +36,6 @@ export type Voice = {
   canSpeakSoftly: boolean;
   canUseVolume: boolean;
   canUsePitch: boolean;
-  supportsSpeechMarks: boolean;
-  gender: 'Male' | 'Female';
-  standardVoice: boolean;
-  supportedFormats: string[];
-  language: string;
 }
 
 type VoiceResponse = {
@@ -101,27 +99,47 @@ export class Talkify {
   }
 
   private validateOptions(options?: Partial<TalkifyOptions>) {
+    const validFormats = ['mp3', 'wav'];
+    if (options?.format && !validFormats.includes(options.format)) {
+      throw new TalkifyError(
+        new Error(`Invalid value for \'format\' property. Available values: ${validFormats.join(',')}`),
+        "VALIDATION_ERROR"
+      );
+    }
     if (options?.volume && (options.volume < -10 || options.volume > 10)) {
-      throw new Error('Invalid range for \'volume\' property. Min: -10, Max: 10.');
+      throw new TalkifyError(
+        new Error('Invalid range for \'volume\' property. Min: -10, Max: 10.'),
+        "VALIDATION_ERROR"
+      );
     }
     if (options?.pitch && (options.pitch < -10 || options.pitch > 10)) {
-      throw new Error('Invalid range for \'pitch\' property. Min: -10, Max: 10.');
+      throw new TalkifyError(
+        new Error('Invalid range for \'pitch\' property. Min: -10, Max: 10.'),
+        "VALIDATION_ERROR"
+      );
     }
     if (options?.wordBreak && (options.wordBreak < 0 || options.wordBreak > 1000)) {
-      throw new Error('Invalid range for \'wordBreak\' property. Min: 0, Max: 1000.');
+      throw new TalkifyError(
+        new Error('Invalid range for \'wordBreak\' property. Min: 0, Max: 1000.'),
+        "VALIDATION_ERROR"
+      );
     }
   }
 
   public async speech(text: string, options?: SpeechOptions):Promise<SpeechStream> {
     this.validateOptions(options);
     try {
+      let selectedVoice = options?.voice ?? this.defaultOptions.voice;
+      if (typeof selectedVoice !== 'string') {
+        selectedVoice = selectedVoice?.name;
+      }
       const response = await this.connector.post<Readable>(
         'speech/v1',
         {
           Text: text,
           Format: options?.format ?? this.defaultOptions.format,
           FallbackLanguage: options?.fallbackLanguage ?? this.defaultOptions.fallbackLanguage,
-          Voice: options?.voice ?? this.defaultOptions.voice,
+          Voice: selectedVoice,
           Rate: options?.rate ?? this.defaultOptions.rate,
           TextType: !(options?.ssml ?? this.defaultOptions.ssml) ? 0 : 1,
           Whisper: options?.whisper ?? this.defaultOptions.whisper,
@@ -134,7 +152,7 @@ export class Talkify {
       );
       return response.data;
     } catch (_err) {
-      const err = <AxiosError>_err;
+      const err = _err as AxiosError;
       throw new TalkifyError(
         err,
         "REQUEST_ERROR",
@@ -154,10 +172,13 @@ export class Talkify {
       // Sanitize response
       const voices: Voice[] = [];
       response.data.forEach((rawVoice: VoiceResponse) => {
-        if (language && rawVoice.Language.toLowerCase() != language.toLowerCase()) return;
+        if (language && rawVoice.Language.toLowerCase() !== language.toLowerCase()) return;
         voices.push({
           culture: rawVoice.Culture,
           name: rawVoice.Name,
+          gender: rawVoice.Gender,
+          language: rawVoice.Language,
+          supportedFormats: rawVoice.SupportedFormats.map(format => format.toLowerCase()),
           description: rawVoice.Description,
           isStandard: rawVoice.IsStandard,
           isPremium: rawVoice.IsPremium,
@@ -169,17 +190,12 @@ export class Talkify {
           canSpeakSoftly: rawVoice.CanSpeakSoftly,
           canUseVolume: rawVoice.CanUseVolume,
           canUsePitch: rawVoice.CanUsePitch,
-          supportsSpeechMarks: rawVoice.SupportsSpeechMarks,
-          gender: rawVoice.Gender,
-          standardVoice: rawVoice.StandardVoice,
-          supportedFormats: rawVoice.SupportedFormats,
-          language: rawVoice.Language
         });
       });
 
       return voices;
     } catch (_err) {
-      const err = <AxiosError>_err;
+      const err = _err as AxiosError;
       throw new TalkifyError(
         err,
         "REQUEST_ERROR",
