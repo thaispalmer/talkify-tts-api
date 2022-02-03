@@ -157,14 +157,15 @@ export class Talkify {
     }
   }
 
-  public async availableVoices(language?: string): Promise<Voice[]> {
+  public async availableVoices(language?: Language | string): Promise<Voice[]> {
     try {
       const response = await this.connector.get('speech/v1/voices', { params: { key: this.defaultOptions.key } });
 
       // Sanitize response
       const voices: Voice[] = [];
+      const languageFilter = typeof language === 'string' ? language : language?.name;
       response.data.forEach((rawVoice: VoiceResponse) => {
-        if (language && rawVoice.Language.toLowerCase() !== language.toLowerCase()) return;
+        if (languageFilter && rawVoice.Language.toLowerCase() !== languageFilter.toLowerCase()) return;
         voices.push({
           culture: rawVoice.Culture,
           name: rawVoice.Name,
@@ -197,7 +198,7 @@ export class Talkify {
     }
   }
 
-  public async detectLanguage(text: string): Promise<Language | null> {
+  public async detectLanguage(text: string): Promise<Language | undefined> {
     try {
       const response = await this.connector.get<DetectLanguageResponse>('language/v1/detect', {
         params: {
@@ -206,7 +207,7 @@ export class Talkify {
         },
       });
 
-      if (response.data.Language === -1) return null;
+      if (response.data.Language === -1) return undefined;
       return {
         name: response.data.LanguageName,
         cultures: response.data.Cultures,
