@@ -60,6 +60,18 @@ export type VoiceResponse = {
   Language: string;
 };
 
+export type Language = {
+  name: string;
+  cultures: string[];
+};
+
+type DetectLanguageResponse = {
+  SpecialCharacters: string[];
+  Language: number;
+  Cultures: string[];
+  LanguageName: string;
+};
+
 export class Talkify {
   private defaultOptions: TalkifyOptions;
   private connector: AxiosInstance;
@@ -180,6 +192,31 @@ export class Talkify {
         err,
         'REQUEST_ERROR',
         err.response?.statusText ?? 'Could not fetch the voices list',
+        err.response?.status,
+      );
+    }
+  }
+
+  public async detectLanguage(text: string): Promise<Language | null> {
+    try {
+      const response = await this.connector.get<DetectLanguageResponse>('language/v1/detect', {
+        params: {
+          text,
+          key: this.defaultOptions.key,
+        },
+      });
+
+      if (response.data.Language === -1) return null;
+      return {
+        name: response.data.LanguageName,
+        cultures: response.data.Cultures,
+      };
+    } catch (_err) {
+      const err = _err as AxiosError;
+      throw new TalkifyError(
+        err,
+        'REQUEST_ERROR',
+        err.response?.statusText ?? 'Could not fetch the language detection response',
         err.response?.status,
       );
     }
