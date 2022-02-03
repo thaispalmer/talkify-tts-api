@@ -37,7 +37,7 @@ export type Voice = {
   canSpeakSoftly: boolean;
   canUseVolume: boolean;
   canUsePitch: boolean;
-}
+};
 
 export type VoiceResponse = {
   Culture: string;
@@ -58,7 +58,7 @@ export type VoiceResponse = {
   StandardVoice: boolean;
   SupportedFormats: string[];
   Language: string;
-}
+};
 
 export class Talkify {
   private defaultOptions: TalkifyOptions;
@@ -68,7 +68,7 @@ export class Talkify {
     if (!options?.key) {
       throw new TalkifyError(
         new Error('Talkify API-key not given. Visit https://manage.talkify.net to create your own API-key.'),
-        "KEY_MISSING"
+        'KEY_MISSING',
       );
     }
 
@@ -78,12 +78,12 @@ export class Talkify {
       ...options,
       key: options.key,
       format: options.format ?? 'mp3',
-      ssml: options.ssml ?? true
+      ssml: options.ssml ?? true,
     };
 
     this.connector = axios.create({
       baseURL: 'https://talkify.net/api/',
-      headers: { 'x-api-key': options.key }
+      headers: { 'x-api-key': options.key },
     });
   }
 
@@ -92,30 +92,24 @@ export class Talkify {
     if (options?.format && !validFormats.includes(options.format)) {
       throw new TalkifyError(
         new Error(`Invalid value for \'format\' property. Available values: ${validFormats.join(',')}`),
-        "VALIDATION_ERROR"
+        'VALIDATION_ERROR',
       );
     }
     if (options?.volume && (options.volume < -10 || options.volume > 10)) {
-      throw new TalkifyError(
-        new Error('Invalid range for \'volume\' property. Min: -10, Max: 10.'),
-        "VALIDATION_ERROR"
-      );
+      throw new TalkifyError(new Error("Invalid range for 'volume' property. Min: -10, Max: 10."), 'VALIDATION_ERROR');
     }
     if (options?.pitch && (options.pitch < -10 || options.pitch > 10)) {
-      throw new TalkifyError(
-        new Error('Invalid range for \'pitch\' property. Min: -10, Max: 10.'),
-        "VALIDATION_ERROR"
-      );
+      throw new TalkifyError(new Error("Invalid range for 'pitch' property. Min: -10, Max: 10."), 'VALIDATION_ERROR');
     }
     if (options?.wordBreak && (options.wordBreak < 0 || options.wordBreak > 1000)) {
       throw new TalkifyError(
-        new Error('Invalid range for \'wordBreak\' property. Min: 0, Max: 1000.'),
-        "VALIDATION_ERROR"
+        new Error("Invalid range for 'wordBreak' property. Min: 0, Max: 1000."),
+        'VALIDATION_ERROR',
       );
     }
   }
 
-  public async speech(text: string, options?: SpeechOptions):Promise<SpeechStream> {
+  public async speech(text: string, options?: SpeechOptions): Promise<SpeechStream> {
     this.validateOptions(options);
     try {
       let selectedVoice = options?.voice ?? this.defaultOptions.voice;
@@ -135,28 +129,25 @@ export class Talkify {
           Soft: options?.soft ?? this.defaultOptions.soft,
           Volume: options?.volume ?? this.defaultOptions.volume,
           WordBreakMs: options?.wordBreak ?? this.defaultOptions.wordBreak,
-          Pitch: options?.pitch ?? this.defaultOptions.pitch
+          Pitch: options?.pitch ?? this.defaultOptions.pitch,
         },
-        { responseType: 'stream' }
+        { responseType: 'stream' },
       );
       return response.data;
     } catch (_err) {
       const err = _err as AxiosError;
       throw new TalkifyError(
         err,
-        "REQUEST_ERROR",
+        'REQUEST_ERROR',
         err.response?.statusText ?? 'Could not synthetize the audio',
-        err.response?.status
+        err.response?.status,
       );
     }
   }
 
-  public async availableVoices(language?: string):Promise<Voice[]> {
+  public async availableVoices(language?: string): Promise<Voice[]> {
     try {
-      const response = await this.connector.get(
-        'speech/v1/voices',
-        { params: { key: this.defaultOptions.key } }
-      );
+      const response = await this.connector.get('speech/v1/voices', { params: { key: this.defaultOptions.key } });
 
       // Sanitize response
       const voices: Voice[] = [];
@@ -167,7 +158,7 @@ export class Talkify {
           name: rawVoice.Name,
           gender: rawVoice.Gender,
           language: rawVoice.Language,
-          supportedFormats: rawVoice.SupportedFormats.map(format => format.toLowerCase()),
+          supportedFormats: rawVoice.SupportedFormats.map((format) => format.toLowerCase()),
           description: rawVoice.Description,
           isStandard: rawVoice.IsStandard,
           isPremium: rawVoice.IsPremium,
@@ -187,9 +178,9 @@ export class Talkify {
       const err = _err as AxiosError;
       throw new TalkifyError(
         err,
-        "REQUEST_ERROR",
+        'REQUEST_ERROR',
         err.response?.statusText ?? 'Could not fetch the voices list',
-        err.response?.status
+        err.response?.status,
       );
     }
   }
