@@ -1,5 +1,10 @@
 # Talkify TTS API
 
+[![npm](https://img.shields.io/npm/v/talkify-tts-api)](https://www.npmjs.com/package/talkify-tts-api)
+[![Types](https://img.shields.io/npm/types/talkify-tts-api)](https://www.jsdocs.io/package/talkify-tts-api#package-index)
+[![jsDocs.io](https://img.shields.io/badge/jsDocs.io-reference-blue)](https://www.jsdocs.io/package/talkify-tts-api)
+[![License](https://img.shields.io/npm/l/talkify-tts-api)](https://github.com/thaispalmer/talkify-tts-api/blob/master/LICENSE)
+
 Library to generate text-to-speech audio through [Talkify.net](https://talkify.net/) APIs.
 
 ## Installation
@@ -66,7 +71,7 @@ const talkify = new Talkify({
 Or in CommonJS:
 
 ```js
-const Talkify = require('talkify-tts-api')
+const { Talkify } = require('talkify-tts-api')
 
 const talkify = new Talkify({
   key: 'YOUR_TALKIFY_API_KEY'
