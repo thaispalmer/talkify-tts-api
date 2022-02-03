@@ -8,7 +8,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -p tsconfig.json"
+    "lint": "tslint -p tsconfig.json",
+    "prepare": "npm run build",
+    "prepublishOnly" : "npm run lint",
+    "preversion" : "npm run lint",
+    "version" : "npm run format && git add -A src",
+    "postversion" : "git push && git push --tags"
   },
   "repository": {
     "type": "git",
@@ -17,9 +22,13 @@
   "keywords": [
     "tts",
     "text to speech",
-    "speech synthesis"
+    "speech synthesis",
+    "talkify"
   ],
-  "author": "Thais Palmer <thais@safik.com.br>",
+  "author": {
+    "name": "Thais Palmer",
+    "email": "thais@safik.com.br"
+  },
   "license": "MIT",
   "devDependencies": {
     "dotenv": "^15.0.0",
