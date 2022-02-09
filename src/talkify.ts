@@ -245,7 +245,13 @@ export class Talkify {
     });
   }
 
-  private validateOptions(options?: Partial<TalkifyOptions>) {
+  /**
+   * Go through the given options that need specific validations and check if they are valid.
+   * 
+   * @param options - The options to be validated, it accepts values from {@link TalkifyOptions} or {@link SpeechOptions}
+   * @throws Will throw a {@link TalkifyError} error if any option is invalid.
+   */
+  private validateOptions(options?: Partial<TalkifyOptions>): void {
     const validFormats = ['mp3', 'wav'];
     if (options?.format && !validFormats.includes(options.format)) {
       throw new TalkifyError(
@@ -275,6 +281,7 @@ export class Talkify {
    * @param text - The text to be used for generating the TTS audio.
    * @param [options] - An optional `SpeechOptions` object that will override the default options from the Talkify instance.
    * @returns A {@link SpeechStream} object will be returned, which is a [`Readable` stream](https://nodejs.org/api/stream.html#readable-streams) that can be used for piping into processing or writing into a file.
+   * @throws Will throw a {@link TalkifyError} error if the request fails.
    */
   public async speech(text: string, options?: SpeechOptions): Promise<SpeechStream> {
     this.validateOptions(options);
@@ -314,6 +321,14 @@ export class Talkify {
     }
   }
 
+  /**
+   * Retrieves a list of the voices available at Talkify, with their own features.
+   * Optionally, it can filter only the voices by a given language.
+   * 
+   * @param [language] - The language to filter the voices from the list. It accepts a string with the language name or a {@link Language} object. Omit to show all voices for all languages. Example: `english`.
+   * @returns An array of {@link Voice} objects.
+   * @throws Will throw a {@link TalkifyError} error if the request fails.
+   */
   public async availableVoices(language?: Language | string): Promise<Voice[]> {
     try {
       const response = await this.connector.get('speech/v1/voices', { params: { key: this.defaultOptions.key } });
