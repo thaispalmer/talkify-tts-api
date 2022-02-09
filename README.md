@@ -166,7 +166,7 @@ Throws a `TalkifyError` exception if the API request failed.
 #### The `Language` Object
 
 - `name`: Name of the language, this is used for the `language` parameter when calling the class methods. Example: `English`.
-- `culture`: An array with the cultures. Example: `['en-US', 'en-GB']`.
+- `cultures`: An array with the cultures. Example: `['en-US', 'en-GB']`.
 
 ## Usage Examples
 
