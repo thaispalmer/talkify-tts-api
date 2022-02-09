@@ -80,26 +80,112 @@ export type SpeechOptions = Omit<TalkifyOptions, 'key'>;
  */
 export type SpeechStream = AxiosResponse<Readable>['data'];
 
+/**
+ * A voice that can be used for speech synthesis. This object contains its metadata and available features.
+ */
 export type Voice = {
+  /**
+   * The language culture string.
+   * Example: `en-US`.
+   */
   culture: string;
+
+  /**
+   * Name of the voice, this is used for the `voice` parameter when calling the {@link Talkify.speech} method.
+   * Example: `Zira`.
+   */
   name: string;
+
+  /**
+   * The gender of the voice.
+   * Example: `Female`.
+   */
   gender: 'Male' | 'Female';
+
+  /**
+   * The language of this voice.
+   * Example: `English`.
+   */
   language: string;
+
+  /**
+   * A list of the supported formats that this voice can generate audio.
+   * Example: `['mp3', 'wav']`.
+   */
   supportedFormats: string[];
+
+  /**
+   * The voice description.
+   * Example: `Zira (English - en-US)`.
+   */
   description: string;
+
+  /**
+   * If this voice belongs to the standard tier.
+   * Example: `true`.
+   */
   isStandard: boolean;
+
+  /**
+   * If this voice belongs to the premium tier.
+   * Example: `true`.
+   */
   isPremium: boolean;
+
+  /**
+   * If this voice belongs to the exclusive tier.
+   * Example: `true`.
+   */
   isExclusive: boolean;
+
+  /**
+   * If this voice belongs to the neural voices tier.
+   * Example: `true`.
+   */
   isNeural: boolean;
+
+  /**
+   * If this voice can use the speech marks feature.
+   * Example: `true`.
+   */
   canUseSpeechMarks: boolean;
+
+  /**
+   * If this voice can use the whisper feature.
+   * Example: `true`.
+   */
   canWhisper: boolean;
+
+  /**
+   * If this voice can use the word break pause feature.
+   * Example: `true`.
+   */
   canUseWordBreak: boolean;
+
+  /**
+   * If this voice can use the softer speech feature.
+   * Example: `true`.
+   */
   canSpeakSoftly: boolean;
+
+  /**
+   * If this voice can use the volume setting.
+   * Example: `true`.
+   */
   canUseVolume: boolean;
+
+  /**
+   * If this voice can use the pitch setting.
+   * Example: `true`.
+   */
   canUsePitch: boolean;
 };
 
-export type VoiceResponse = {
+/**
+ * The raw response for the [Voice list](https://manage.talkify.net/docs#api-reference-speech-voices) API.
+ * This type is used internally within the {@link Talkify.availableVoices} method.
+ */
+type VoiceResponse = {
   Culture: string;
   Name: string;
   Description: string;
