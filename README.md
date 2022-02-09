@@ -141,7 +141,7 @@ Throws a `TalkifyError` exception if the API request failed.
 - `isExclusive`: If this voice belongs to the exclusive tier. Example: `true`.
 - `isNeural`: If this voice belongs to the neural voices tier. Example: `true`.
 - `canUseSpeechMarks`: If this voice can use the speech marks feature. Example: `true`.
-- `canWhisper`: If this voice can use the speech marks feature. Example: `true`.
+- `canWhisper`: If this voice can use the whisper feature. Example: `true`.
 - `canUseWordBreak`: If this voice can use the word break pause feature. Example: `true`.
 - `canSpeakSoftly`: If this voice can use the softer speech feature. Example: `true`.
 - `canUseVolume`: If this voice can use the volume setting. Example: `true`.
