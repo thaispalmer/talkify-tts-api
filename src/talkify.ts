@@ -5,7 +5,7 @@ import TalkifyError from './talkifyError';
 export interface TalkifyOptions {
   key: string | undefined;
   format?: 'mp3' | 'wav';
-  fallbackLanguage?: string;
+  fallbackLanguage?: Language | string;
   voice?: Voice | string;
   rate?: number;
   ssml?: boolean;
@@ -58,6 +58,18 @@ export type VoiceResponse = {
   StandardVoice: boolean;
   SupportedFormats: string[];
   Language: string;
+};
+
+export type Language = {
+  name: string;
+  cultures: string[];
+};
+
+type DetectLanguageResponse = {
+  SpecialCharacters: string[];
+  Language: number;
+  Cultures: string[];
+  LanguageName: string;
 };
 
 export class Talkify {
@@ -116,12 +128,14 @@ export class Talkify {
       if (typeof selectedVoice !== 'string') {
         selectedVoice = selectedVoice?.name;
       }
+      let fallbackLanguage = options?.fallbackLanguage ?? this.defaultOptions.fallbackLanguage;
+      fallbackLanguage = typeof fallbackLanguage === 'string' ? fallbackLanguage : fallbackLanguage?.name;
       const response = await this.connector.post<Readable>(
         'speech/v1',
         {
           Text: text,
           Format: options?.format ?? this.defaultOptions.format,
-          FallbackLanguage: options?.fallbackLanguage ?? this.defaultOptions.fallbackLanguage,
+          FallbackLanguage: fallbackLanguage,
           Voice: selectedVoice,
           Rate: options?.rate ?? this.defaultOptions.rate,
           TextType: !(options?.ssml ?? this.defaultOptions.ssml) ? 0 : 1,
@@ -145,14 +159,15 @@ export class Talkify {
     }
   }
 
-  public async availableVoices(language?: string): Promise<Voice[]> {
+  public async availableVoices(language?: Language | string): Promise<Voice[]> {
     try {
       const response = await this.connector.get('speech/v1/voices', { params: { key: this.defaultOptions.key } });
 
       // Sanitize response
       const voices: Voice[] = [];
+      const languageFilter = typeof language === 'string' ? language : language?.name;
       response.data.forEach((rawVoice: VoiceResponse) => {
-        if (language && rawVoice.Language.toLowerCase() !== language.toLowerCase()) return;
+        if (languageFilter && rawVoice.Language.toLowerCase() !== languageFilter.toLowerCase()) return;
         voices.push({
           culture: rawVoice.Culture,
           name: rawVoice.Name,
@@ -180,6 +195,31 @@ export class Talkify {
         err,
         'REQUEST_ERROR',
         err.response?.statusText ?? 'Could not fetch the voices list',
+        err.response?.status,
+      );
+    }
+  }
+
+  public async detectLanguage(text: string): Promise<Language | undefined> {
+    try {
+      const response = await this.connector.get<DetectLanguageResponse>('language/v1/detect', {
+        params: {
+          text,
+          key: this.defaultOptions.key,
+        },
+      });
+
+      if (response.data.Language === -1) return undefined;
+      return {
+        name: response.data.LanguageName,
+        cultures: response.data.Cultures,
+      };
+    } catch (_err) {
+      const err = _err as AxiosError;
+      throw new TalkifyError(
+        err,
+        'REQUEST_ERROR',
+        err.response?.statusText ?? 'Could not fetch the language detection response',
         err.response?.status,
       );
     }
