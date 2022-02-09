@@ -5,7 +5,7 @@ import TalkifyError from './talkifyError';
 export interface TalkifyOptions {
   key: string | undefined;
   format?: 'mp3' | 'wav';
-  fallbackLanguage?: string;
+  fallbackLanguage?: Language | string;
   voice?: Voice | string;
   rate?: number;
   ssml?: boolean;
@@ -128,12 +128,14 @@ export class Talkify {
       if (typeof selectedVoice !== 'string') {
         selectedVoice = selectedVoice?.name;
       }
+      let fallbackLanguage = options?.fallbackLanguage ?? this.defaultOptions.fallbackLanguage;
+      fallbackLanguage = typeof fallbackLanguage === 'string' ? fallbackLanguage : fallbackLanguage?.name;
       const response = await this.connector.post<Readable>(
         'speech/v1',
         {
           Text: text,
           Format: options?.format ?? this.defaultOptions.format,
-          FallbackLanguage: options?.fallbackLanguage ?? this.defaultOptions.fallbackLanguage,
+          FallbackLanguage: fallbackLanguage,
           Voice: selectedVoice,
           Rate: options?.rate ?? this.defaultOptions.rate,
           TextType: !(options?.ssml ?? this.defaultOptions.ssml) ? 0 : 1,
