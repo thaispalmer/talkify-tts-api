@@ -234,10 +234,24 @@ type DetectLanguageResponse = {
   LanguageName: string;
 };
 
+/**
+ * This class can generate text-to-speech audio through [Talkify.net](https://talkify.net/) APIs
+ */
 export class Talkify {
+  /**
+   * This holds the configuration values that will be used by default through this class methods.
+   */
   private defaultOptions: TalkifyOptions;
+
+  /**
+   * An Axios instance properly configured to access the Talkify API.
+   */
   private connector: AxiosInstance;
 
+  /**
+   * Creates an instance for the {@link Talkify} class.
+   * @param options A {@link TalkifyOptions} object that contains the default configuration options.
+   */
   constructor(options: TalkifyOptions) {
     if (!options?.key) {
       throw new TalkifyError(
