@@ -206,11 +206,27 @@ type VoiceResponse = {
   Language: string;
 };
 
+/**
+ * A language that can be used for speech synthesis or filtering voices. This object contains its metadata only.
+ */
 export type Language = {
+  /**
+   * Name of the language, this is used for the `language` parameter when calling the class methods.
+   * Example: `English`.
+   */
   name: string;
+
+  /**
+   * An array with the cultures.
+   * Example: `['en-US', 'en-GB']`.
+   */
   cultures: string[];
 };
 
+/**
+ * The raw response for the [Detect language](https://manage.talkify.net/docs#api-reference-language-detect-language) API.
+ * This type is used internally within the {@link Talkify.detectLanguage} method.
+ */
 type DetectLanguageResponse = {
   SpecialCharacters: string[];
   Language: number;
@@ -370,6 +386,13 @@ export class Talkify {
     }
   }
 
+  /**
+   * This method will use the Talkify API to detect the language for the given text string.
+   * 
+   * @param text - The string that will be used to detect the language. Example: `May the Force be with you`.
+   * @returns A {@link Language} object will be returned. If a language can't be detected, `undefined` will be returned instead.
+   * @throws Will throw a {@link TalkifyError} error if the request fails.
+   */
   public async detectLanguage(text: string): Promise<Language | undefined> {
     try {
       const response = await this.connector.get<DetectLanguageResponse>('language/v1/detect', {
