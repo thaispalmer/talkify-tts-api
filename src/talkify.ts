@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse, AxiosInstance } from 'axios';
 import { Readable } from 'stream';
-import TalkifyError from './talkifyError';
+import TalkifyError, { TalkifyErrors } from './talkifyError';
 
 /**
  * Default options for the {@link Talkify} class.
@@ -250,13 +250,14 @@ export class Talkify {
 
   /**
    * Creates an instance for the {@link Talkify} class.
+   *
    * @param options A {@link TalkifyOptions} object that contains the default configuration options.
    */
   constructor(options: TalkifyOptions) {
     if (!options?.key) {
       throw new TalkifyError(
         new Error('Talkify API-key not given. Visit https://manage.talkify.net to create your own API-key.'),
-        'KEY_MISSING',
+        TalkifyErrors.KeyMissing,
       );
     }
 
@@ -277,7 +278,7 @@ export class Talkify {
 
   /**
    * Go through the given options that need specific validations and check if they are valid.
-   * 
+   *
    * @param options - The options to be validated, it accepts values from {@link TalkifyOptions} or {@link SpeechOptions}
    * @throws Will throw a {@link TalkifyError} error if any option is invalid.
    */
@@ -286,28 +287,33 @@ export class Talkify {
     if (options?.format && !validFormats.includes(options.format)) {
       throw new TalkifyError(
         new Error(`Invalid value for \'format\' property. Available values: ${validFormats.join(',')}`),
-        'VALIDATION_ERROR',
+        TalkifyErrors.ValidationError,
       );
     }
     if (options?.volume && (options.volume < -10 || options.volume > 10)) {
-      throw new TalkifyError(new Error("Invalid range for 'volume' property. Min: -10, Max: 10."), 'VALIDATION_ERROR');
+      throw new TalkifyError(
+        new Error("Invalid range for 'volume' property. Min: -10, Max: 10."),
+        TalkifyErrors.ValidationError,
+      );
     }
     if (options?.pitch && (options.pitch < -10 || options.pitch > 10)) {
-      throw new TalkifyError(new Error("Invalid range for 'pitch' property. Min: -10, Max: 10."), 'VALIDATION_ERROR');
+      throw new TalkifyError(
+        new Error("Invalid range for 'pitch' property. Min: -10, Max: 10."),
+        TalkifyErrors.ValidationError,
+      );
     }
     if (options?.wordBreak && (options.wordBreak < 0 || options.wordBreak > 1000)) {
       throw new TalkifyError(
         new Error("Invalid range for 'wordBreak' property. Min: 0, Max: 1000."),
-        'VALIDATION_ERROR',
+        TalkifyErrors.ValidationError,
       );
     }
   }
 
   /**
    * This method will synthetize a text-to-speech audio with the given text string or SSML XML content.
-   * 
    * **Important:** When using SSML, the text input must be correct. All XML characters that are not part of the SSML syntax must be escaped or a `Bad Request` will be thrown.
-   * 
+   *
    * @param text - The text to be used for generating the TTS audio.
    * @param [options] - An optional `SpeechOptions` object that will override the default options from the Talkify instance.
    * @returns A {@link SpeechStream} object will be returned, which is a [`Readable` stream](https://nodejs.org/api/stream.html#readable-streams) that can be used for piping into processing or writing into a file.
@@ -344,7 +350,7 @@ export class Talkify {
       const err = _err as AxiosError;
       throw new TalkifyError(
         err,
-        'REQUEST_ERROR',
+        TalkifyErrors.RequestError,
         err.response?.statusText ?? 'Could not synthetize the audio',
         err.response?.status,
       );
@@ -354,7 +360,7 @@ export class Talkify {
   /**
    * Retrieves a list of the voices available at Talkify, with their own features.
    * Optionally, it can filter only the voices by a given language.
-   * 
+   *
    * @param [language] - The language to filter the voices from the list. It accepts a string with the language name or a {@link Language} object. Omit to show all voices for all languages. Example: `english`.
    * @returns An array of {@link Voice} objects.
    * @throws Will throw a {@link TalkifyError} error if the request fails.
@@ -393,7 +399,7 @@ export class Talkify {
       const err = _err as AxiosError;
       throw new TalkifyError(
         err,
-        'REQUEST_ERROR',
+        TalkifyErrors.RequestError,
         err.response?.statusText ?? 'Could not fetch the voices list',
         err.response?.status,
       );
@@ -402,7 +408,7 @@ export class Talkify {
 
   /**
    * This method will use the Talkify API to detect the language for the given text string.
-   * 
+   *
    * @param text - The string that will be used to detect the language. Example: `May the Force be with you`.
    * @returns A {@link Language} object will be returned. If a language can't be detected, `undefined` will be returned instead.
    * @throws Will throw a {@link TalkifyError} error if the request fails.
@@ -425,7 +431,7 @@ export class Talkify {
       const err = _err as AxiosError;
       throw new TalkifyError(
         err,
-        'REQUEST_ERROR',
+        TalkifyErrors.RequestError,
         err.response?.statusText ?? 'Could not fetch the language detection response',
         err.response?.status,
       );
