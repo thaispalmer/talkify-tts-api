@@ -1,6 +1,6 @@
 {
   "name": "talkify-tts-api",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Library to generate TTS directly from Talkify.net APIs",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
